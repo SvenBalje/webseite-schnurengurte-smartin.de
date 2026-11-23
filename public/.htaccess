@@ -1,0 +1,49 @@
+# Apache-Konfiguration (wird mit dem Build hochgeladen)
+# Staging: scripts/prepare-staging.mjs entfernt den HSTS-Block und ergänzt "noindex".
+
+Options -Indexes
+ErrorDocument 404 /404.html
+DirectoryIndex index.html
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # Immer HTTPS
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+# Versteckte Dateien (z. B. .git, .ftp-deploy-sync-state.json) nie ausliefern
+<FilesMatch "^\.">
+  Require all denied
+</FilesMatch>
+
+<IfModule mod_headers.c>
+  # CSP: Neue externe Quellen (nach Einwilligung geladene Dienste) hier ergänzen, z. B. script-src 'self' https://statistik.example.org
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()"
+  Header always set X-Frame-Options "DENY"
+  Header always set Cross-Origin-Opener-Policy "same-origin"
+  # HSTS-START (nur Produktion)
+  # Bewusst ohne includeSubDomains: sonst wären staging./webmail. ohne gültiges Zertifikat ein Jahr lang gesperrt
+  Header always set Strict-Transport-Security "max-age=31536000" "expr=%{HTTPS} == 'on'"
+  # HSTS-ENDE
+  Header unset X-Powered-By
+
+  # Caching: gehashte Build-Dateien (/_astro/) ein Jahr, übrige Dateien aus public/ einen Tag, HTML immer frisch
+  <FilesMatch "\.(js|css|woff2?|svg|png|jpe?g|webp|avif|gif|ico)$">
+    Header set Cache-Control "public, max-age=86400"
+  </FilesMatch>
+  <If "%{REQUEST_URI} =~ m#^/_astro/#">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </If>
+  <FilesMatch "\.(html|xml|txt)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>
+
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css application/javascript text/xml application/xml text/plain image/svg+xml
+</IfModule>

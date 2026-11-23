@@ -1,0 +1,40 @@
+---
+import Base from '../layouts/Base.astro';
+import site from '../site.config';
+
+const i = site.impressum;
+---
+
+<Base titel="Impressum" beschreibung={`Impressum von ${site.name}: Anbieterkennzeichnung nach § 5 DDG.`}>
+  <h1>Impressum</h1>
+
+  <h2>Angaben gemäß § 5 DDG</h2>
+  <p>
+    {i.firma}<br />
+    {i.strasse}<br />
+    {i.plzOrt}
+  </p>
+
+  <p>Vertreten durch: {i.vertreten}</p>
+
+  <h2>Kontakt</h2>
+  <p>
+    Telefon: {i.telefon}<br />
+    E-Mail: <a href={`mailto:${i.email}`}>{i.email}</a>
+  </p>
+
+  <h2>Registereintrag</h2>
+  <p>
+    Registergericht: {i.registergericht}<br />
+    Registernummer: {i.registernummer}
+  </p>
+
+  <h2>Umsatzsteuer-ID</h2>
+  <p>Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG: {i.ustId}</p>
+
+  <h2>Verbraucherstreitbeilegung</h2>
+  <p>
+    Wir sind nicht bereit und nicht verpflichtet, an Streitbeilegungsverfahren vor einer
+    Verbraucherschlichtungsstelle teilzunehmen.
+  </p>
+</Base>

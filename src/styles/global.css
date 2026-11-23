@@ -1,0 +1,199 @@
+:root {
+  --farbe-text: #1d2330;
+  --farbe-hintergrund: #ffffff;
+  --farbe-flaeche: #f3f5f8;
+  --farbe-akzent: #0b5cad;
+  --farbe-akzent-text: #ffffff;
+  --farbe-rand: #d5dae2;
+  --schrift: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --breite: 72rem;
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--schrift);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: var(--farbe-text);
+  background: var(--farbe-hintergrund);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+  padding-block: 2.5rem 4rem;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: var(--farbe-akzent);
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 3px solid var(--farbe-akzent);
+  outline-offset: 2px;
+}
+
+h1 {
+  font-size: clamp(1.9rem, 4vw + 1rem, 3rem);
+  line-height: 1.15;
+  margin: 0 0 1rem;
+}
+
+h2 {
+  font-size: clamp(1.35rem, 2vw + 0.8rem, 1.8rem);
+  line-height: 1.25;
+  margin: 2rem 0 0.75rem;
+}
+
+.breite {
+  width: 100%;
+  max-width: var(--breite);
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0.5rem;
+  background: var(--farbe-akzent);
+  color: var(--farbe-akzent-text);
+  padding: 0.5rem 1rem;
+  z-index: 100;
+}
+
+.skip-link:focus {
+  left: 0.5rem;
+}
+
+.kopf {
+  border-bottom: 1px solid var(--farbe-rand);
+}
+
+.kopf .breite {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+  padding-block: 1rem;
+}
+
+.logo {
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--farbe-text);
+  text-decoration: none;
+}
+
+nav ul {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.25rem;
+  margin: 0;
+  padding: 0;
+}
+
+nav a {
+  text-decoration: none;
+  padding-block: 0.5rem;
+  display: inline-block;
+}
+
+nav a[aria-current='page'] {
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.3em;
+}
+
+.fuss {
+  background: var(--farbe-flaeche);
+  border-top: 1px solid var(--farbe-rand);
+  font-size: 0.95rem;
+}
+
+.fuss .breite {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem 1.5rem;
+  padding-block: 1.25rem;
+}
+
+.fuss p {
+  margin: 0;
+}
+
+.knopf {
+  font: inherit;
+  font-weight: 600;
+  min-height: 2.75rem;
+  padding: 0.6rem 1.4rem;
+  border-radius: 0.4rem;
+  border: 2px solid var(--farbe-akzent);
+  background: var(--farbe-akzent);
+  color: var(--farbe-akzent-text);
+  cursor: pointer;
+}
+
+.link-knopf {
+  font: inherit;
+  background: none;
+  border: 0;
+  padding: 0.5rem 0;
+  color: var(--farbe-akzent);
+  cursor: pointer;
+}
+
+.cookie-banner {
+  position: fixed;
+  inset: auto 1rem 1rem 1rem;
+  max-width: 36rem;
+  margin-inline: auto;
+  background: var(--farbe-hintergrund);
+  border: 1px solid var(--farbe-rand);
+  border-radius: 0.6rem;
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.18);
+  padding: 1.25rem;
+  z-index: 50;
+}
+
+.cookie-banner h2 {
+  margin-top: 0;
+  font-size: 1.2rem;
+}
+
+/* Beide Knöpfe gleichwertig: gleiche Größe, Farbe und Ebene */
+.cookie-knoepfe {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

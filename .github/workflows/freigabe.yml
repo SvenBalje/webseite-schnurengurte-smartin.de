@@ -1,0 +1,69 @@
+name: Freigabe für Produktion
+
+# Nach dem OK des Kunden: GitHub → Actions → "Freigabe für Produktion" → Run workflow.
+# Setzt main per Fast-Forward auf den Stand von staging und lädt danach auf Produktion hoch.
+# (Pushes mit dem GITHUB_TOKEN starten keine weiteren Workflows – deshalb ruft dieser
+#  Workflow den Deploy selbst auf.)
+
+on:
+  workflow_dispatch:
+    inputs:
+      bestaetigung:
+        description: 'Kunde hat Staging freigegeben – zum Bestätigen "live" eintippen'
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: freigabe
+  cancel-in-progress: false
+
+jobs:
+  main-aktualisieren:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Bestätigung prüfen
+        env:
+          BESTAETIGUNG: ${{ inputs.bestaetigung }}
+        run: |
+          if [ "$BESTAETIGUNG" != "live" ]; then
+            echo "::error::Zum Bestätigen bitte genau 'live' eintippen."
+            exit 1
+          fi
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: main per Fast-Forward auf staging setzen
+        run: |
+          git fetch origin staging main 2>/dev/null || git fetch origin staging
+          staging=$(git rev-parse origin/staging)
+          if main=$(git rev-parse --verify -q origin/main); then
+            if [ "$main" = "$staging" ]; then
+              echo "::notice::main ist bereits auf dem Stand von staging – es wird trotzdem neu hochgeladen."
+              exit 0
+            fi
+            if ! git merge-base --is-ancestor "$main" "$staging"; then
+              echo "::error::main enthält Commits, die nicht in staging sind. Bitte zuerst main in staging übernehmen."
+              exit 1
+            fi
+            {
+              echo "### Diese Änderungen gehen live"
+              echo '```'
+              git log --oneline "$main..$staging"
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+          git push origin "$staging:refs/heads/main"
+
+  deploy:
+    needs: main-aktualisieren
+    uses: ./.github/workflows/deploy.yml
+    with:
+      umgebung: production
+    secrets: inherit

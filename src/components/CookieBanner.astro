@@ -1,0 +1,116 @@
+---
+// Cookie-Banner mit gleichwertigem "Ablehnen".
+// Erscheint nur, wenn in site.config.ts einwilligungsDienste eingetragen sind.
+// Vor der Einwilligung wird KEIN externer Dienst geladen.
+import site from '../site.config';
+
+const dienste = site.einwilligungsDienste;
+---
+
+{
+  dienste.length > 0 && (
+    <>
+      <div
+        id="cookie-banner"
+        class="cookie-banner"
+        role="dialog"
+        aria-modal="false"
+        aria-labelledby="cookie-titel"
+        hidden
+      >
+        <h2 id="cookie-titel">Ihre Privatsphäre</h2>
+        <p>
+          Wir möchten folgende Dienste nur mit Ihrer Einwilligung nutzen. Sie können die Einwilligung
+          jederzeit über „Cookie-Einstellungen“ im Seitenfuß widerrufen. Mehr in der{' '}
+          <a href="/datenschutz/">Datenschutzerklärung</a>.
+        </p>
+        <ul>
+          {dienste.map((d) => (
+            <li>
+              <strong>{d.name}:</strong> {d.beschreibung}
+            </li>
+          ))}
+        </ul>
+        <div class="cookie-knoepfe">
+          <button type="button" class="knopf" data-einwilligung="ablehnen">
+            Ablehnen
+          </button>
+          <button type="button" class="knopf" data-einwilligung="akzeptieren">
+            Akzeptieren
+          </button>
+        </div>
+      </div>
+      <script type="application/json" id="einwilligungs-dienste" set:html={JSON.stringify(dienste.map((d) => ({ id: d.id, src: d.src }))).replace(/</g, '\\u003c')} />
+    </>
+  )
+}
+
+<script>
+  const SCHLUESSEL = 'einwilligung-v1';
+  const banner = document.getElementById('cookie-banner');
+  const datenEl = document.getElementById('einwilligungs-dienste');
+
+  if (banner && datenEl) {
+    const dienste: Array<{ id: string; src: string }> = JSON.parse(datenEl.textContent || '[]');
+
+    const lesen = (): string | null => {
+      try {
+        return localStorage.getItem(SCHLUESSEL);
+      } catch {
+        return null;
+      }
+    };
+    const speichern = (wert: string) => {
+      try {
+        localStorage.setItem(SCHLUESSEL, wert);
+      } catch {
+        /* privater Modus – Einwilligung gilt dann nur für diesen Seitenaufruf */
+      }
+    };
+
+    const ladeDienste = () => {
+      for (const d of dienste) {
+        if (document.querySelector(`script[data-dienst="${CSS.escape(d.id)}"]`)) continue;
+        const s = document.createElement('script');
+        s.src = d.src;
+        s.async = true;
+        s.dataset.dienst = d.id;
+        document.head.appendChild(s);
+      }
+    };
+
+    const anwenden = (wert: string | null) => {
+      if (wert === 'akzeptieren') {
+        banner.hidden = true;
+        ladeDienste();
+      } else if (wert === 'ablehnen') {
+        banner.hidden = true;
+      } else {
+        banner.hidden = false;
+      }
+    };
+
+    banner.addEventListener('click', (e) => {
+      const knopf = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-einwilligung]');
+      if (!knopf) return;
+      const wert = knopf.dataset.einwilligung!;
+      const vorher = lesen();
+      speichern(wert);
+      // Widerruf: bereits geladene Skripte lassen sich nicht entladen → neu laden
+      if (vorher === 'akzeptieren' && wert === 'ablehnen') {
+        location.reload();
+        return;
+      }
+      anwenden(wert);
+    });
+
+    document.querySelectorAll('[data-cookie-einstellungen]').forEach((el) =>
+      el.addEventListener('click', () => {
+        banner.hidden = false;
+        banner.querySelector<HTMLButtonElement>('[data-einwilligung]')?.focus();
+      }),
+    );
+
+    anwenden(lesen());
+  }
+</script>

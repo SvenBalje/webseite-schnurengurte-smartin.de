@@ -1,0 +1,85 @@
+---
+import '@fontsource-variable/inter';
+import '../styles/global.css';
+import site from '../site.config';
+import CookieBanner from '../components/CookieBanner.astro';
+
+interface Props {
+  titel: string;
+  beschreibung?: string;
+  /** false für Seiten ohne Canonical (z. B. 404) */
+  canonical?: boolean;
+  noindex?: boolean;
+}
+
+const { titel, beschreibung = site.beschreibung, canonical = true, noindex = false } = Astro.props;
+const seitenTitel = titel === site.name ? site.name : `${titel} | ${site.name}`;
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
+const jahr = new Date().getFullYear();
+const aktuell = Astro.url.pathname.replace(/\/$/, '') || '/';
+---
+
+<!doctype html>
+<html lang={site.sprache}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{seitenTitel}</title>
+    <meta name="description" content={beschreibung} />
+    {canonical && <link rel="canonical" href={canonicalUrl} />}
+    {noindex && <meta name="robots" content="noindex" />}
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={seitenTitel} />
+    <meta property="og:description" content={beschreibung} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:locale" content="de_DE" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+  </head>
+  <body>
+    <a class="skip-link" href="#inhalt">Zum Inhalt springen</a>
+    <header class="kopf">
+      <div class="breite">
+        <a class="logo" href="/">{site.name}</a>
+        <nav aria-label="Hauptnavigation">
+          <ul>
+            {
+              site.navigation.map((p) => (
+                <li>
+                  <a href={p.href} aria-current={aktuell === p.href ? 'page' : undefined}>
+                    {p.titel}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main id="inhalt" class="breite">
+      <slot />
+    </main>
+
+    <footer class="fuss">
+      <div class="breite">
+        <p>© {jahr} {site.name}</p>
+        <nav aria-label="Rechtliches">
+          <ul>
+            <li><a href="/impressum/">Impressum</a></li>
+            <li><a href="/datenschutz/">Datenschutz</a></li>
+            {site.einwilligungsDienste.length > 0 && (
+              <li>
+                <button type="button" class="link-knopf" data-cookie-einstellungen>
+                  Cookie-Einstellungen
+                </button>
+              </li>
+            )}
+          </ul>
+        </nav>
+      </div>
+    </footer>
+
+    <CookieBanner />
+  </body>
+</html>

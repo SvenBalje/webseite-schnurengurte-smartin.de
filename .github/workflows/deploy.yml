@@ -1,0 +1,254 @@
+name: Deploy
+
+# Branch  → GitHub-Environment → Ziel
+#   staging → staging            → https://staging.<domain>   (Kunde testet)
+#   main    → production         → https://<domain>           (nur über "Freigabe für Produktion")
+#
+# Upload: rsync über SSH (Secrets SSH_*). Fehlen diese oder schlägt rsync fehl → FTPS (Secrets FTP_*).
+# Einrichten: scripts/setup-secrets.ps1 -Umgebung staging|production
+# Environment-Variable SITE_URL (z. B. https://staging.kunde.de) setzt das Script ebenfalls.
+
+on:
+  push:
+    branches: [staging, main]
+  workflow_dispatch:
+    inputs:
+      probelauf:
+        description: 'Probelauf: nur anzeigen, was hochgeladen/gelöscht würde'
+        type: boolean
+        default: false
+  workflow_call:
+    inputs:
+      umgebung:
+        description: 'staging oder production'
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    # Nur staging/main deployen (oder Aufruf aus "Freigabe für Produktion")
+    if: inputs.umgebung != '' || github.ref_name == 'staging' || github.ref_name == 'main'
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.umgebung || (github.ref_name == 'main' && 'production' || 'staging') }}
+      url: ${{ vars.SITE_URL }}
+    concurrency:
+      group: deploy-${{ inputs.umgebung || (github.ref_name == 'main' && 'production' || 'staging') }}
+      cancel-in-progress: false
+    env:
+      UMGEBUNG: ${{ inputs.umgebung || (github.ref_name == 'main' && 'production' || 'staging') }}
+      SITE_URL: ${{ vars.SITE_URL }}
+      ASTRO_TELEMETRY_DISABLED: '1'
+      PROBELAUF: ${{ inputs.probelauf == true && '1' || '' }}
+    steps:
+      - name: Zugangsdaten prüfen
+        id: creds
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSH_PATH: ${{ secrets.SSH_PATH }}
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_PATH: ${{ secrets.FTP_PATH }}
+        run: |
+          ssh=nein; ftp=nein
+          if [ -n "$SSH_HOST" ] && [ -n "$SSH_KEY" ] && [ -n "$SSH_PATH" ]; then ssh=ja; fi
+          if [ -n "$FTP_HOST" ] && [ -n "$FTP_PATH" ]; then ftp=ja; fi
+          echo "ssh=$ssh" >> "$GITHUB_OUTPUT"
+          echo "ftp=$ftp" >> "$GITHUB_OUTPUT"
+          if [ "$ssh" = nein ] && [ "$ftp" = nein ]; then
+            echo "::warning::Environment '$UMGEBUNG' hat weder SSH- noch FTP-Secrets – es wird nur gebaut und geprüft. Einrichten mit scripts/setup-secrets.ps1 -Umgebung $UMGEBUNG"
+          elif [ "$ssh" = nein ]; then
+            echo "::notice::Environment '$UMGEBUNG' hat keine SSH-Secrets – Upload per FTPS."
+          fi
+          if [ -z "$SITE_URL" ]; then
+            if [ "$UMGEBUNG" = staging ] && { [ "$ssh" = ja ] || [ "$ftp" = ja ]; }; then
+              echo "::error::Environment-Variable SITE_URL fehlt (z. B. https://staging.kunde.de) – sonst zeigen Canonical/Sitemap auf die falsche Domain."
+              exit 1
+            fi
+            echo "::warning::SITE_URL nicht gesetzt – es gilt die URL aus src/site.config.ts."
+          fi
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.UMGEBUNG == 'production' && 'main' || 'staging' }}
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          TZ: Europe/Berlin
+
+      - name: Staging-Anpassungen (noindex, ohne HSTS)
+        if: env.UMGEBUNG == 'staging'
+        run: npm run staging:vorbereiten
+
+      # Staging: Platzhalter sind Warnungen. Produktion: keine Platzhalter erlaubt –
+      # außer es gibt keine Zugangsdaten (z. B. in der Vorlage selbst), dann wird ohnehin nichts hochgeladen.
+      - name: Prüfen
+        id: pruefen
+        env:
+          SSH: ${{ steps.creds.outputs.ssh }}
+          FTP: ${{ steps.creds.outputs.ftp }}
+        run: |
+          if [ "$UMGEBUNG" = production ] && { [ "$SSH" = ja ] || [ "$FTP" = ja ]; }; then
+            npm run check:produktion
+          else
+            npm run check
+          fi
+
+      # ---------- Upload per rsync über SSH ----------
+      - name: SSH einrichten
+        id: ssh_setup
+        if: steps.creds.outputs.ssh == 'ja'
+        continue-on-error: true
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          if [ -n "$SSH_KNOWN_HOSTS" ]; then
+            printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          else
+            echo "::warning::Kein SSH_KNOWN_HOSTS-Secret – Host-Schlüssel wird ungeprüft per ssh-keyscan übernommen. Bitte setup-secrets erneut ausführen."
+            ssh-keyscan -p "${SSH_PORT:-22}" "$SSH_HOST" > ~/.ssh/known_hosts 2>/dev/null
+          fi
+          chmod 600 ~/.ssh/known_hosts
+
+      # Überträgt nur geänderte Dateien (Prüfsumme), schaltet sie am Ende gemeinsam scharf
+      # und entfernt Dateien, die es im Build nicht mehr gibt.
+      - name: Upload (rsync über SSH)
+        id: rsync
+        if: steps.creds.outputs.ssh == 'ja' && steps.ssh_setup.outcome == 'success'
+        continue-on-error: true
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_PATH: ${{ secrets.SSH_PATH }}
+        run: |
+          set -o pipefail
+          extra=()
+          if [ -n "$PROBELAUF" ]; then extra+=(--dry-run); echo "::notice::Probelauf – auf dem Server wird nichts geändert."; fi
+          ssh_cmd="ssh -p ${SSH_PORT:-22} -i $HOME/.ssh/deploy_key -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=30"
+          # Sicherung: nie in das Home-Verzeichnis oder "/" synchronisieren (--delete würde dort alles löschen)
+          pfad_q=$(printf '%q' "${SSH_PATH%/}")
+          # Schlägt diese Prüfung fehl, ist die Konfiguration falsch → kein FTPS-Rückfall, Job scheitert ("blockiert")
+          if ! ziel=$($ssh_cmd "${SSH_USER}@${SSH_HOST}" "cd -- $pfad_q && pwd -P && cd ~ && pwd -P"); then
+            if $ssh_cmd "${SSH_USER}@${SSH_HOST}" true; then
+              echo "::error::Zielordner SSH_PATH existiert nicht auf dem Server – setup-secrets erneut ausführen."
+              echo "blockiert=1" >> "$GITHUB_OUTPUT"
+            fi
+            exit 1
+          fi
+          zielordner=$(printf '%s\n' "$ziel" | sed -n 1p); home=$(printf '%s\n' "$ziel" | sed -n 2p)
+          if [ -z "$zielordner" ] || [ "$zielordner" = "/" ] || [ "$zielordner" = "$home" ]; then
+            echo "::error::SSH_PATH zeigt auf '$zielordner' (Home-Verzeichnis oder /). Abbruch zum Schutz der Daten."
+            echo "blockiert=1" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+          rsync -rlzc --delete-delay --delay-updates --chmod=D755,F644 \
+            --itemize-changes --stats "${extra[@]}" \
+            --exclude='.git*' \
+            --exclude-from=deploy-ausschluss.txt \
+            -e "$ssh_cmd" \
+            dist/ "${SSH_USER}@${SSH_HOST}:${zielordner}/"
+
+      - name: SSH-Schlüssel entfernen
+        if: always() && steps.creds.outputs.ssh == 'ja'
+        run: rm -f ~/.ssh/deploy_key
+
+      # ---------- Rückfall: FTPS ----------
+      - name: Rückfall auf FTPS nötig?
+        id: rueckfall
+        # nur wenn Build und Prüfung erfolgreich waren
+        if: ${{ !cancelled() && steps.pruefen.outcome == 'success' }}
+        env:
+          SSH: ${{ steps.creds.outputs.ssh }}
+          FTP: ${{ steps.creds.outputs.ftp }}
+          RSYNC: ${{ steps.rsync.outcome }}
+          BLOCKIERT: ${{ steps.rsync.outputs.blockiert }}
+        run: |
+          if [ "$SSH" = ja ] && [ "$RSYNC" = success ]; then echo "ftp=nein" >> "$GITHUB_OUTPUT"; exit 0; fi
+          if [ "$BLOCKIERT" = 1 ]; then
+            echo "::error::Upload aus Sicherheitsgründen abgebrochen (falscher Zielordner) – kein FTPS-Rückfall."
+            exit 1
+          fi
+          if [ "$SSH" = ja ]; then
+            if [ "$FTP" = ja ]; then
+              echo "::warning::rsync über SSH fehlgeschlagen – lade per FTPS hoch."
+            else
+              echo "::error::rsync über SSH fehlgeschlagen und keine FTP-Secrets als Rückfall vorhanden."
+              exit 1
+            fi
+          fi
+          echo "ftp=$FTP" >> "$GITHUB_OUTPUT"
+
+      - name: Upload (FTPS, nur geänderte Dateien)
+        id: ftp1
+        if: ${{ !cancelled() && steps.rueckfall.outputs.ftp == 'ja' }}
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@110f9186c050f71550953127052e77650219c287 # v4.4.0
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          port: ${{ secrets.FTP_PORT || 21 }}
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          # strict = Zertifikat prüfen; setup-secrets setzt FTP_SECURITY=loose nur bei unpassendem Zertifikat
+          security: ${{ vars.FTP_SECURITY || 'strict' }}
+          timeout: 120000
+          local-dir: ./dist/
+          server-dir: ${{ secrets.FTP_PATH }}
+          dry-run: ${{ env.PROBELAUF == '1' }}
+          exclude: |
+            **/.git*
+            **/.git*/**
+            .well-known/**
+
+      - name: Upload – zweiter Versuch (FTPS)
+        if: ${{ !cancelled() && steps.rueckfall.outputs.ftp == 'ja' && steps.ftp1.outcome == 'failure' }}
+        uses: SamKirkland/FTP-Deploy-Action@110f9186c050f71550953127052e77650219c287 # v4.4.0
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          port: ${{ secrets.FTP_PORT || 21 }}
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          # strict = Zertifikat prüfen; setup-secrets setzt FTP_SECURITY=loose nur bei unpassendem Zertifikat
+          security: ${{ vars.FTP_SECURITY || 'strict' }}
+          timeout: 120000
+          local-dir: ./dist/
+          server-dir: ${{ secrets.FTP_PATH }}
+          dry-run: ${{ env.PROBELAUF == '1' }}
+          exclude: |
+            **/.git*
+            **/.git*/**
+            .well-known/**
+
+      - name: Zusammenfassung
+        if: always()
+        env:
+          RSYNC: ${{ steps.rsync.outcome }}
+          FTP1: ${{ steps.ftp1.outcome }}
+        run: |
+          {
+            echo "### Deploy $UMGEBUNG"
+            echo "- Ziel: ${SITE_URL:-(SITE_URL nicht gesetzt)}"
+            echo "- rsync/SSH: ${RSYNC:-nicht verwendet}"
+            echo "- FTPS: ${FTP1:-nicht verwendet}"
+            if [ -n "$PROBELAUF" ]; then echo "- **Probelauf** – nichts geändert"; fi
+          } >> "$GITHUB_STEP_SUMMARY"
