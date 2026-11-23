@@ -1,0 +1,10 @@
+# Ordner/Dateien im Zielordner, die der rsync-Upload NIE anfasst (nicht überschreiben, nicht löschen).
+# Wichtig, wenn z. B. der Staging-Ordner innerhalb des Produktions-Webroots liegt.
+# Ein Muster pro Zeile, rsync-Syntax, "/" am Anfang = direkt im Zielordner.
+# setup-secrets.ps1 -Umgebung production schlägt vorhandene fremde Ordner zum Eintragen vor.
+/.well-known/
+/cgi-bin/
+/logs/
+/stats/
+/staging/
+/.ftp-deploy-sync-state.json

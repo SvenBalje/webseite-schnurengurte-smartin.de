@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.astro/
+.lighthouse/
+.cache/
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+Thumbs.db
+# lokal erzeugte Deploy-Schlüssel nie einchecken
+deploy_key*
+*.pem
+.claude/settings.local.json

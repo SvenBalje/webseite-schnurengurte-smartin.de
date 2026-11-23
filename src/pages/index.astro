@@ -1,0 +1,15 @@
+---
+import Base from '../layouts/Base.astro';
+import site from '../site.config';
+---
+
+<Base titel={site.name}>
+  <h1>{site.name}</h1>
+  <p>{site.beschreibung}</p>
+
+  <h2>Willkommen</h2>
+  <p>
+    PLATZHALTER Einleitungstext: Diese Startseite stammt aus der Webseiten-Vorlage. Inhalte, Seiten
+    und Gestaltung werden für jedes Projekt angepasst.
+  </p>
+</Base>
