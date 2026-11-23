@@ -1,15 +1,195 @@
 ---
+import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
+import Hero from '../components/Hero.astro';
+import GestalterTeaser from '../components/GestalterTeaser.astro';
+import Handlung from '../components/Handlung.astro';
+import Kordel from '../components/Kordel.astro';
+import Farbleiste from '../components/Farbleiste.astro';
+import KontaktBereich from '../components/KontaktBereich.astro';
 import site from '../site.config';
+import modelle from '../data/modelle';
+
+import schnurengurte from '../assets/bilder/kopf/schnurengurte.jpg';
+import handgefertigt from '../assets/bilder/start/handgefertigt.jpg';
+import material from '../assets/bilder/start/material.jpg';
+import braunesPferd from '../assets/bilder/start/braunes-pferd.jpg';
+import modelleBreiten from '../assets/bilder/start/modelle-breiten.jpg';
+import angebote from '../assets/bilder/start/angebote.jpg';
+import zaun from '../assets/bilder/kopf/gurte-am-zaun.webp';
+import kopf2 from '../assets/bilder/kopf/kopf-2.webp';
+import kordelbaender from '../assets/bilder/kopf/kordelbaender.jpg';
+import kopf5 from '../assets/bilder/kopf/kopf-5.jpg';
+
+const eindruecke = [
+  { src: zaun, alt: 'Sechs Schnurengurte in Braun, Natur und Blau hängen an einem Geländer vor einem See' },
+  { src: handgefertigt, alt: 'Reiterin auf einem Pony zwischen einer Herde Kühe auf der Weide' },
+  { src: kopf2, alt: 'Sechs bunte Schnurengurte mit Edelstahlschnallen auf einem Geländer im Herbstlaub' },
+  { src: kordelbaender, alt: 'Fünf Schnurengurte in Braun, Rot und Türkis an einem Holzgeländer am Wasser' },
+  { src: kopf5, alt: 'Drei Schnurengurte in Natur, Schwarz und Türkis an einem Geländer vor Birken' },
+];
+const gurte = modelle.filter((m) => m.slug !== 'schnallenschutz');
+const schnallenschutz = modelle.find((m) => m.slug === 'schnallenschutz')!;
 ---
 
 <Base titel={site.name}>
-  <h1>{site.name}</h1>
-  <p>{site.beschreibung}</p>
+  <Hero
+    bild={schnurengurte}
+    alt="Drei fertige Schnurengurte mit Rautenmustern in Rot, Natur und Türkis an einem Geländer am See"
+    dachzeile="Herzlich willkommen bei s. mARTin"
+    titel="Jeder Gurt ein Unikat."
+  >
+    <p class="einleitung">
+      Handgefertigte Schnurengurte vom Profi. Die Gurte werden eigens für Sie gefertigt, und Sie können aktiv an der
+      Gestaltung Ihres Schnurengurtes mitwirken. Somit ist jeder Gurt ein Unikat, denn Ihre Wünsche und die Bedürfnisse
+      Ihres Pferdes stehen bei mir im Mittelpunkt.
+    </p>
+    <div class="knopf-reihe">
+      <a class="knopf knopf--akzent" href="/gurt-gestalten/">Gurt gestalten</a>
+      <a class="knopf knopf--hell" href="/preise/">Preise &amp; Probegurt</a>
+    </div>
+  </Hero>
 
-  <h2>Willkommen</h2>
-  <p>
-    PLATZHALTER Einleitungstext: Diese Startseite stammt aus der Webseiten-Vorlage. Inhalte, Seiten
-    und Gestaltung werden für jedes Projekt angepasst.
-  </p>
+  <section class="abschnitt abschnitt--tanne" aria-labelledby="erwarte">
+    <div class="breite">
+      <Kordel farben={['#e7efee', '#e7efee', '#f3c86b', '#e7efee']} />
+      <div class="abschnitt__kopf">
+        <h2 id="erwarte">Ich habe nur das Beste für Sie</h2>
+      </div>
+      <ul class="vorteile">
+        <li class="vorteil">
+          <h3>Atmungsaktiv</h3>
+          <p>Schnurengurte sind atmungsaktiv, da Wolle temperaturausgleichend ist.</p>
+        </li>
+        <li class="vorteil">
+          <h3>Keine Scheuerstellen</h3>
+          <p>Weiches, anschmiegsames Material, das 8&nbsp;mm stark ist.</p>
+        </li>
+        <li class="vorteil">
+          <h3>Gleichmäßiger Druck</h3>
+          <p>Die Anzugslast teilt sich durch die Anzahl der Schnüre.</p>
+        </li>
+      </ul>
+      <div class="split split--schmal-bild abstand-oben">
+        <div class="split__bild bild-quer">
+          <Image src={material} alt="Detail eines braunen Schnurengurtes mit rotem Schnallenschutz und Edelstahl-Rollschnalle" widths={[480, 683]} sizes="(min-width: 52rem) 35vw, 100vw" />
+        </div>
+        <div>
+          <h3 class="h2-klein">Dazu hochwertige rostfreie Rollschnallen aus Edelstahl V2A.</h3>
+          <Handlung gestalten="Jetzt Ihren Gurt gestalten" anfragen={false} dunkel />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="abschnitt split split--randlos" aria-labelledby="warum">
+    <div class="split__bild">
+      <Image src={braunesPferd} alt="Simone Behrens hockt auf einem herbstlichen Waldweg und kuschelt mit einem fuchsfarbenen Pony" widths={[640, 960, 1400]} sizes="(min-width: 52rem) 50vw, 100vw" />
+    </div>
+    <div class="warum-text">
+      <h2 id="warum">Warum ich?</h2>
+      <p class="einleitung">
+        Mein Name ist Simone Behrens und ich bin das Gesicht hinter s.&nbsp;mARTin. Für mich ist es wichtig,
+        handwerklich und kreativ zu arbeiten, und ich habe einen hohen Anspruch an Qualität und Funktionalität.
+      </p>
+      <p>
+        Jeder Gurt beginnt mit Ihren Wünschen und jedes Motiv ist einzigartig. Die Palette reicht von schlicht bis
+        aufwändig, von gerade bis anatomisch geformt. Die Knotentechnik ist die Basis jedes Gurtes.
+      </p>
+      <p>
+        Ich lege Wert auf Langlebigkeit, Materialien und Funktionalität. Das in Kombination mit einem ansprechenden
+        Design ist s.&nbsp;mARTin-Schnurengurte.
+      </p>
+      <p class="unterschrift">Simone Behrens</p>
+      <Handlung gestalten={false} anfragen="Persönlich beraten lassen" anrufen />
+    </div>
+  </section>
+
+  <GestalterTeaser id="teaser-gestalter" />
+
+  <section class="abschnitt abschnitt--wolle" aria-labelledby="materialien">
+    <div class="breite">
+      <div class="abschnitt__kopf">
+        <h2 id="materialien">Materialien</h2>
+        <p class="einleitung">Vier Naturfasern, viele Farben. Dazu der passende Schnallenschutz aus Wollfilz.</p>
+      </div>
+      <ul class="material-zeilen">
+        {
+          gurte.map((m) => (
+            <li class="material-zeile">
+              <h3>
+                <a href={`/modelle/${m.slug}/`}>{m.name}</a>
+              </h3>
+              <p>{m.kurz}</p>
+              <Farbleiste farben={m.farben} />
+              <Image src={m.bild.src} alt={m.bild.alt} widths={[144, 288]} sizes="9rem" />
+            </li>
+          ))
+        }
+      </ul>
+      <p class="abstand-oben-klein">
+        <a href={`/modelle/${schnallenschutz.slug}/`}>Schnallenschutz</a>: {schnallenschutz.kurz}
+      </p>
+      <Handlung gestalten="Farben im Gestalter ausprobieren" anfragen={false} />
+    </div>
+  </section>
+
+  <section class="abschnitt" aria-labelledby="breiten">
+    <div class="breite split split--bild-rechts">
+      <div class="split__bild bild-quer">
+        <Image src={modelleBreiten} alt="Sieben Schnurengurte in Braun, Rot, Türkis und Schwarz hängen über einem Holzgeländer" widths={[480, 800, 1024]} sizes="(min-width: 52rem) 45vw, 100vw" />
+      </div>
+      <div>
+        <h2 id="breiten">Modelle und Breiten</h2>
+        <ul class="breiten">
+          <li><strong>13</strong> Schnüre für Ponys bis Stockmaß 1&nbsp;m</li>
+          <li><strong>15</strong> Schnüre für Endmaßponys</li>
+          <li><strong>17</strong> Schnüre für Warmblüter</li>
+        </ul>
+        <p class="hinweis">Das sind Empfehlungen, und es muss im Einzelfall auch anders entschieden werden.</p>
+        <p><a href="/material/">Mehr zu Material &amp; Breiten</a></p>
+        <Handlung gestalten="Breite im Gestalter wählen" anfragen={false} />
+      </div>
+    </div>
+  </section>
+
+  <section class="abschnitt abschnitt--sand" aria-labelledby="angebote">
+    <div class="breite split split--schmal-bild">
+      <div class="split__bild bild-hochkant">
+        <Image src={angebote} alt="Silhouetten einer Reitergruppe auf einem Hügel vor wolkigem Himmel" widths={[480, 824]} sizes="(min-width: 52rem) 40vw, 100vw" />
+      </div>
+      <div>
+        <h2 id="angebote">Sehen Sie sich jetzt meine Angebote an</h2>
+        <div class="knopf-reihe">
+          <a class="knopf" href="/preise/">Preise und Probegurt</a>
+          <a class="knopf knopf--hell" href="/blankets-satteldecken/">Blankets &amp; Satteldecken</a>
+          <a class="knopf knopf--hell" href="/handgestrickt/">Handgestrickt</a>
+        </div>
+        <h3 class="abstand-oben">Über die Pflege</h3>
+        <p>
+          Damit Ihr Sattelgurt aus Mohair oder Alpaka lange schön bleibt, braucht er etwas Sorgfalt beim Waschen.{' '}
+          <a href="/pflege/">Zur Pflegeanleitung</a>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="abschnitt" aria-labelledby="eindruecke">
+    <div class="breite">
+      <div class="abschnitt__kopf">
+        <h2 id="eindruecke">Gurte im Licht</h2>
+      </div>
+    </div>
+    <div class="bildleiste">
+      {eindruecke.map((b) => <Image src={b.src} alt={b.alt} widths={[400, 720]} sizes="(min-width: 48rem) 20vw, 50vw" />)}
+    </div>
+    <div class="breite">
+      <div class="knopf-reihe">
+        <a class="knopf" href="/galerie/">Galerie ansehen</a>
+        <a class="knopf knopf--hell" href="#kontakt">So einen Gurt anfragen</a>
+      </div>
+    </div>
+  </section>
+
+  <KontaktBereich seite="startseite" />
 </Base>

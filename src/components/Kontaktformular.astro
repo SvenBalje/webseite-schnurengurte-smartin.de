@@ -1,0 +1,54 @@
+---
+// Kontaktformular – versendet über public/kontakt.php (PHP beim Hoster nötig).
+interface Props {
+  /** Kennung der Seite, von der die Anfrage kommt (erscheint im Betreff der Mail) */
+  seite: string;
+  /** Vorbelegter Text, z. B. „Anfrage zu Alpaka“ */
+  vorlage?: string;
+}
+
+const { seite, vorlage = '' } = Astro.props;
+const id = `formular-${seite.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}`;
+---
+
+<form class="formular" action="/kontakt.php" method="post" data-kontaktformular>
+  <input type="hidden" name="seite" value={seite} />
+  <input type="hidden" name="dauer" value="" data-dauer />
+  <div class="formular__falle" aria-hidden="true">
+    <label for={`${id}-webseite`}>Bitte leer lassen</label>
+    <input id={`${id}-webseite`} type="text" name="webseite" tabindex="-1" autocomplete="off" />
+  </div>
+  <div>
+    <label for={`${id}-name`}>Ihr Name</label>
+    <input id={`${id}-name`} type="text" name="name" required maxlength="100" autocomplete="name" />
+  </div>
+  <div>
+    <label for={`${id}-email`}>Ihre E-Mail-Adresse</label>
+    <input id={`${id}-email`} type="email" name="email" required maxlength="200" autocomplete="email" />
+  </div>
+  <div>
+    <label for={`${id}-telefon`}>Telefon <span class="hinweis">(optional, für Rückrufe)</span></label>
+    <input id={`${id}-telefon`} type="tel" name="telefon" maxlength="40" autocomplete="tel" />
+  </div>
+  <div>
+    <label for={`${id}-nachricht`}>Ihre Nachricht</label>
+    <textarea id={`${id}-nachricht`} name="nachricht" required maxlength="5000">{vorlage}</textarea>
+  </div>
+  <p class="hinweis">
+    Ihre Angaben werden nur zur Bearbeitung Ihrer Anfrage verwendet. Mehr dazu in der{' '}
+    <a href="/datenschutz/">Datenschutzerklärung</a>.
+  </p>
+  <button type="submit" class="knopf">Nachricht senden</button>
+</form>
+
+<script>
+  // Spamschutz: Ausfülldauer im Browser messen (unabhängig von der Uhrzeit des Geräts).
+  // Zu schnelles Absenden = Bot.
+  const start = performance.now();
+  for (const formular of document.querySelectorAll<HTMLFormElement>('[data-kontaktformular]')) {
+    formular.addEventListener('submit', () => {
+      const feld = formular.querySelector<HTMLInputElement>('[data-dauer]');
+      if (feld) feld.value = String(Math.floor((performance.now() - start) / 1000));
+    });
+  }
+</script>

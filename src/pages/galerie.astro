@@ -1,0 +1,117 @@
+---
+import { Image, getImage } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import galerie from '../data/galerie';
+
+// Eine flache Liste aller Bilder; die Gurtart steckt in data-gruppe und wird per Filter gewählt.
+const kennung = (titel: string) =>
+  titel
+    .toLowerCase()
+    .replace(/ä/g, 'ae')
+    .replace(/ö/g, 'oe')
+    .replace(/ü/g, 'ue')
+    .replace(/[^a-z]+/g, '-');
+
+const gruppen = galerie.map((g) => ({ ...g, id: kennung(g.titel) }));
+// Großansicht vorab in fester Größe erzeugen (Link-Ziel ohne JavaScript und Bild im Leuchtkasten)
+const bilder = await Promise.all(
+  gruppen.flatMap((g) =>
+    g.bilder.map(async (b) => ({ ...b, gruppe: g.id, gross: (await getImage({ src: b.src, width: 1600, format: 'webp' })).src })),
+  ),
+);
+const anzahl = bilder.length;
+---
+
+<Base titel="Galerie" beschreibung={`Galerie mit ${anzahl} handgefertigten Schnurengurten von s.mARTin: Englischgurte, Westerngurte, anatomisch geformte Gurte und viele Unikate.`}>
+  <section class="galerie-raum" aria-labelledby="galerie-titel">
+    <div class="breite">
+      <div class="galerie-kopf">
+        <div>
+          <h1 id="galerie-titel">Galerie</h1>
+          <p class="galerie-kopf__zeile">{anzahl} Gurte. Jeder ein Unikat.</p>
+        </div>
+        <p class="einleitung">
+          Jeder Gurt beginnt mit Ihren Wünschen und jedes Motiv ist einzigartig. Lassen Sie sich inspirieren – ein Klick
+          auf ein Bild öffnet die Großansicht.
+        </p>
+      </div>
+
+      {/* Ohne JavaScript blendet ohne-js.css den Filter aus; alle Bilder bleiben sichtbar */}
+      <div class="galerie-filter" role="group" aria-label="Nach Gurtart filtern" data-galerie-filter>
+        <button type="button" aria-pressed="true" data-filter="alle" data-text="">
+          Alle <span class="galerie-filter__zahl">{anzahl}</span>
+        </button>
+        {
+          gruppen.map((g) => (
+            <button type="button" aria-pressed="false" data-filter={g.id} data-text={g.text}>
+              {g.titel} <span class="galerie-filter__zahl">{g.bilder.length}</span>
+            </button>
+          ))
+        }
+      </div>
+      <p class="galerie-status" role="status" data-galerie-status></p>
+      <noscript>
+        <ul class="galerie-gruppentexte">
+          {gruppen.filter((g) => g.text).map((g) => <li><strong>{g.titel}:</strong> {g.text}</li>)}
+        </ul>
+      </noscript>
+
+      <ul class="galerie" data-galerie>
+        {
+          bilder.map((b, i) => (
+            <li data-gruppe={b.gruppe}>
+              <a href={b.gross} data-leuchtkasten data-alt={b.alt}>
+                <Image
+                  src={b.src}
+                  alt={b.alt}
+                  widths={i % 9 === 0 ? [480, 640, 800] : [320, 480, 640]}
+                  quality={i % 9 === 0 ? 50 : 55}
+                  sizes={i % 9 === 0 ? "(min-width: 64rem) 40rem, (min-width: 40rem) 64vw, 100vw" : "(min-width: 64rem) 20rem, (min-width: 40rem) 31vw, 48vw"}
+                  loading={i < 3 ? 'eager' : 'lazy'}
+                  fetchpriority={i === 0 ? 'high' : undefined}
+                />
+                <span class="galerie__etikett" aria-hidden="true">{b.alt}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="abschnitt" aria-labelledby="eigener">
+    <div class="breite abschnitt__kopf abschnitt__kopf--mitte">
+      <h2 id="eigener">Ihr Gurt soll auch hier hängen?</h2>
+      <p>Sie haben ein Motiv gefunden, das Ihnen gefällt – oder eine ganz eigene Idee?</p>
+      <div class="knopf-reihe">
+        <a class="knopf knopf--akzent" href="/gurt-gestalten/">Gurt gestalten</a>
+        <a class="knopf" href="/kontakt/">Anfrage senden</a>
+        <a class="knopf knopf--hell" href="/preise/">Preise ansehen</a>
+      </div>
+    </div>
+  </section>
+
+  <dialog class="leuchtkasten" aria-label="Großansicht">
+    <div class="leuchtkasten__leiste">
+      <p class="leuchtkasten__zaehler" data-zaehler></p>
+      <button type="button" class="leuchtkasten__knopf" aria-label="Schließen" data-schliessen>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+      </button>
+    </div>
+    <figure class="leuchtkasten__bild">
+      <img alt="" hidden />
+      <figcaption></figcaption>
+    </figure>
+    <button type="button" class="leuchtkasten__knopf leuchtkasten__zurueck" aria-label="Vorheriges Bild" data-zurueck>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+    </button>
+    <button type="button" class="leuchtkasten__knopf leuchtkasten__weiter" aria-label="Nächstes Bild" data-weiter>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+    </button>
+  </dialog>
+</Base>
+
+<script>
+  import '../scripts/galerie-filter';
+  import '../scripts/leuchtkasten';
+</script>

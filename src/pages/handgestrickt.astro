@@ -1,0 +1,67 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import KontaktBereich from '../components/KontaktBereich.astro';
+import wolle from '../assets/bilder/handgestrickt/wolle.webp';
+import pullover from '../assets/bilder/handgestrickt/merino-pullover.webp';
+---
+
+<Base titel="Handgestrickt" beschreibung="Handgesponnen, handgefärbt, handgestrickt: Einzelstücke aus Wolle von s.mARTin – ohne Strom gefertigt, mit Regenwasser gewaschen. Zum Beispiel ein Merino-Pullover.">
+  <section class="abschnitt" aria-labelledby="titel">
+    <div class="breite split">
+      <div class="split__bild bild-quer">
+        <Image src={wolle} alt="Simone Behrens sitzt am Spinnrad und spinnt Wolle" widths={[480, 800, 1200]} sizes="(min-width: 52rem) 45vw, 100vw" loading="eager" />
+      </div>
+      <div>
+        <h1 id="titel">Handgestrickt</h1>
+        <p class="einleitung">
+          Auch in meiner Freizeit beschäftige ich mich mit Wolle und Design. Ich spinne Wolle und fertige daraus einige
+          Kleidungsstücke an, die ich Euch nicht vorenthalten möchte.
+        </p>
+        <p>
+          Leider würde mein Kleiderschrank platzen, wenn ich nur für mich stricken würde, daher immer mal schauen, was
+          ich anzubieten habe. Es handelt sich immer um Einzelstücke, die in liebevoller Handarbeit gefertigt werden.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="abschnitt abschnitt--wolle" aria-labelledby="entstehung">
+    <div class="breite text-breite">
+      <h2 id="entstehung">So entsteht ein Strickstück</h2>
+      <ol class="knoten-liste">
+        <li>Diese Kleidungsstücke werden ohne Strom gefertigt, da alles Handarbeit ist. Gewaschen wird die Wolle mit Regenwasser, dann getrocknet.</li>
+        <li>Um sie zu verspinnen, kardiere ich sie. Dann erst wird gesponnen.</li>
+        <li>Nach dem Verzwirnen kommt die Wolle in ein Entspannungsbad, und erst dann wird sie verstrickt.</li>
+      </ol>
+      <p>Nun viel Spaß beim Anschauen und Tragen der Strickstücke.</p>
+      <p class="unterschrift">Liebe Grüße, Eure s.&nbsp;mARTin</p>
+    </div>
+  </section>
+
+  <section class="abschnitt" aria-labelledby="angebot">
+    <div class="breite split split--bild-rechts split--schmal-bild">
+      <div class="split__bild bild-hochkant">
+        <Image src={pullover} alt="Handgestrickter Pullover aus Merinowolle mit Muster in Grün und Rotbraun, an einem Kleiderbügel im Garten" widths={[480, 800, 1125]} sizes="(min-width: 52rem) 40vw, 100vw" />
+      </div>
+      <div>
+        <h2 id="angebot">Pullover aus Merinowolle</h2>
+        <p>
+          Tauche ein in meine handgefertigte Eleganz mit diesem exquisiten Pullover aus Merinowolle. Jede Masche wurde
+          sorgfältig von Hand gestrickt, und die Größe 34/36 garantiert eine perfekte Passform für einen einzigartigen
+          Look.
+        </p>
+        <p>
+          Die atemberaubende grüne Farbe des Pullovers entstand durch eine aufwändige Handfärbung. Trage nicht nur Mode,
+          sondern ein Statement für handgemachtes Können.
+        </p>
+        <p class="preis">175 €</p>
+        <div class="knopf-reihe">
+          <a class="knopf knopf--akzent" href="#kontakt">Jetzt anfragen</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <KontaktBereich seite="handgestrickt" vorlage={'Hallo Simone, ich interessiere mich für den Merino-Pullover (Größe 34/36).\n\n'} titel="Interesse? Schreibt mir!" text="Dann schreibt mir eine Nachricht oder ruft an – ich erzähle Euch gern mehr über das Stück." />
+</Base>

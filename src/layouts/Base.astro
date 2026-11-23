@@ -1,8 +1,13 @@
 ---
-import '@fontsource-variable/inter';
+import '@fontsource-variable/bitter/wght.css';
 import '../styles/global.css';
+import { getImage } from 'astro:assets';
 import site from '../site.config';
 import CookieBanner from '../components/CookieBanner.astro';
+import Logo from '../components/Logo.astro';
+import ogStandard from '../assets/bilder/kopf/schnurengurte.jpg';
+// Schriftdatei vorab laden, damit die großen Überschriften beim Laden nicht springen
+import schriftUrl from '@fontsource-variable/bitter/files/bitter-latin-wght-normal.woff2?url';
 
 interface Props {
   titel: string;
@@ -16,7 +21,31 @@ const { titel, beschreibung = site.beschreibung, canonical = true, noindex = fal
 const seitenTitel = titel === site.name ? site.name : `${titel} | ${site.name}`;
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
 const jahr = new Date().getFullYear();
-const aktuell = Astro.url.pathname.replace(/\/$/, '') || '/';
+const pfad = Astro.url.pathname.replace(/\/?$/, '/');
+const istAktiv = (href: string) => pfad === href;
+const ogBild = await getImage({ src: ogStandard, width: 1200, height: 630, fit: 'cover', format: 'jpg' });
+const ogBildUrl = new URL(ogBild.src, Astro.site).href;
+const i = site.impressum;
+
+const strukturDaten = {
+  '@context': 'https://schema.org',
+  '@type': 'LocalBusiness',
+  name: i.firma,
+  description: site.beschreibung,
+  url: site.url,
+  image: ogBildUrl,
+  telephone: i.telefonLink,
+  email: i.email,
+  founder: { '@type': 'Person', name: i.inhaberin },
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: i.strasse,
+    postalCode: i.plzOrt.split(' ')[0],
+    addressLocality: i.plzOrt.split(' ').slice(1).join(' '),
+    addressCountry: 'DE',
+  },
+  sameAs: [site.instagram],
+};
 ---
 
 <!doctype html>
@@ -28,58 +57,142 @@ const aktuell = Astro.url.pathname.replace(/\/$/, '') || '/';
     <meta name="description" content={beschreibung} />
     {canonical && <link rel="canonical" href={canonicalUrl} />}
     {noindex && <meta name="robots" content="noindex" />}
+    <meta name="theme-color" content="#ecebe6" />
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.name} />
     <meta property="og:title" content={seitenTitel} />
     <meta property="og:description" content={beschreibung} />
     <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={ogBildUrl} />
     <meta property="og:locale" content="de_DE" />
+    <link rel="preload" href={schriftUrl} as="font" type="font/woff2" crossorigin />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
+    <!-- Ohne JavaScript: Navigation offen bzw. per Hover bedienbar (eigene Datei wegen CSP) -->
+    <noscript><link rel="stylesheet" href="/ohne-js.css" /></noscript>
+    {Astro.url.pathname === '/' && <script type="application/ld+json" is:inline set:html={JSON.stringify(strukturDaten).replace(/</g, '\\u003c')} />}
   </head>
   <body>
     <a class="skip-link" href="#inhalt">Zum Inhalt springen</a>
     <header class="kopf">
-      <div class="breite">
-        <a class="logo" href="/">{site.name}</a>
-        <nav aria-label="Hauptnavigation">
+      <div class="breite kopf__innen">
+        <Logo />
+        {/* Mobil: Hauptaufforderung bleibt neben dem Menü-Knopf sichtbar */}
+        <a class="knopf knopf--akzent kopf__handlung" href="/gurt-gestalten/" aria-current={istAktiv('/gurt-gestalten/') ? 'page' : undefined}>Gurt gestalten</a>
+        <button type="button" class="menue-knopf" aria-expanded="false" aria-controls="haupt-nav">
+          <span class="menue-knopf__linien" aria-hidden="true"></span>
+          <span class="menue-knopf__text">Menü</span>
+        </button>
+        <nav id="haupt-nav" class="haupt-nav" aria-label="Hauptnavigation">
           <ul>
             {
-              site.navigation.map((p) => (
-                <li>
-                  <a href={p.href} aria-current={aktuell === p.href ? 'page' : undefined}>
-                    {p.titel}
-                  </a>
-                </li>
-              ))
+              site.navigation.map((eintrag, index) =>
+                eintrag.kinder ? (
+                  <li class="hat-untermenue">
+                    <button
+                      type="button"
+                      class:list={['unter-knopf', { 'ist-aktiv': eintrag.kinder.some((k) => istAktiv(k.href)) }]}
+                      aria-expanded="false"
+                      aria-controls={`untermenue-${index}`}
+                    >
+                      {eintrag.titel}
+                    </button>
+                    <ul id={`untermenue-${index}`} class="untermenue">
+                      {eintrag.kinder.map((kind) => (
+                        <li>
+                          <a href={kind.href} aria-current={istAktiv(kind.href) ? 'page' : undefined}>
+                            {kind.titel}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                ) : (
+                  <li>
+                    <a
+                      href={eintrag.href}
+                      class:list={{ 'nav-kontakt': eintrag.href === '/kontakt/', 'nav-hervorgehoben': eintrag.hervorheben }}
+                      aria-current={istAktiv(eintrag.href) ? 'page' : undefined}
+                    >
+                      {eintrag.titel}
+                    </a>
+                  </li>
+                ),
+              )
             }
           </ul>
         </nav>
       </div>
     </header>
 
-    <main id="inhalt" class="breite">
+    <main id="inhalt">
       <slot />
     </main>
 
     <footer class="fuss">
       <div class="breite">
-        <p>© {jahr} {site.name}</p>
-        <nav aria-label="Rechtliches">
-          <ul>
-            <li><a href="/impressum/">Impressum</a></li>
-            <li><a href="/datenschutz/">Datenschutz</a></li>
-            {site.einwilligungsDienste.length > 0 && (
-              <li>
-                <button type="button" class="link-knopf" data-cookie-einstellungen>
-                  Cookie-Einstellungen
-                </button>
-              </li>
-            )}
-          </ul>
-        </nav>
+        <div class="fuss__handlung">
+          <p class="fuss__frage">Lust auf einen eigenen Gurt?</p>
+          <div class="knopf-reihe">
+            <a class="knopf knopf--akzent" href="/gurt-gestalten/">Gurt gestalten</a>
+            <a class="knopf knopf--rahmen" href={`tel:${i.telefonLink}`}>Anrufen: {i.telefon}</a>
+          </div>
+        </div>
+        <div class="fuss__raster">
+          <div>
+            <Logo hoehe={96} imFuss />
+            <p>Handgefertigte Schnurengurte, Blankets und Satteldecken – jedes Stück ein Unikat.</p>
+          </div>
+          <div>
+            <h2>Kontakt</h2>
+            <p>Telefon: <a href={`tel:${i.telefonLink}`}>{i.telefon}</a></p>
+            <p>E-Mail: <a href={`mailto:${i.email}`}>{i.email}</a></p>
+            <p><a href={site.instagram} rel="noopener">Instagram: s.martin_reitzubehoer</a></p>
+          </div>
+          <div>
+            <h2>Anschrift</h2>
+            <p>
+              {i.inhaberin}<br />
+              {i.strasse}<br />
+              {i.plzOrt}
+            </p>
+            <p><a href={site.routenplaner} rel="noopener">Route planen</a></p>
+          </div>
+          <nav aria-label="Informationen">
+            <h2>Informationen</h2>
+            <ul>
+              <li><a href="/preise/">Preise &amp; Probegurt</a></li>
+              <li><a href="/pflege/">Pflege</a></li>
+              <li><a href="/allgemeine/">Rücknahme &amp; Widerruf</a></li>
+              <li><a href="/galerie/">Galerie</a></li>
+            </ul>
+          </nav>
+        </div>
+        <div class="fuss__unten">
+          <p>© {jahr} {i.firma} · {i.inhaberin}</p>
+          <nav aria-label="Rechtliches">
+            <ul>
+              <li><a href="/impressum/">Impressum</a></li>
+              <li><a href="/datenschutz/">Datenschutz</a></li>
+              {
+                site.einwilligungsDienste.length > 0 && (
+                  <li>
+                    <button type="button" class="link-knopf" data-cookie-einstellungen>
+                      Cookie-Einstellungen
+                    </button>
+                  </li>
+                )
+              }
+            </ul>
+          </nav>
+        </div>
       </div>
     </footer>
 
     <CookieBanner />
+
+    <script>
+      import '../scripts/navigation';
+    </script>
   </body>
 </html>

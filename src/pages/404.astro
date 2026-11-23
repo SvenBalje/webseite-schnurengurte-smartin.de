@@ -1,9 +1,19 @@
 ---
 import Base from '../layouts/Base.astro';
+import Kordel from '../components/Kordel.astro';
 ---
 
-<Base titel="Seite nicht gefunden" beschreibung="Die angeforderte Seite wurde leider nicht gefunden. Über die Startseite geht es weiter." canonical={false} noindex>
-  <h1>Seite nicht gefunden</h1>
-  <p>Die angeforderte Seite gibt es nicht (mehr). Vielleicht hilft Ihnen die Startseite weiter.</p>
-  <p><a class="knopf" href="/">Zur Startseite</a></p>
+<Base titel="Seite nicht gefunden" beschreibung="Die angeforderte Seite wurde leider nicht gefunden. Über die Startseite oder die Galerie geht es weiter." canonical={false} noindex>
+  <section class="abschnitt">
+    <div class="breite abschnitt__kopf abschnitt__kopf--mitte">
+      <h1>Hier hat sich der Faden verloren</h1>
+      <p class="einleitung">Die angeforderte Seite gibt es nicht (mehr). Vielleicht hilft Ihnen einer dieser Wege weiter.</p>
+      <Kordel />
+      <div class="knopf-reihe">
+        <a class="knopf" href="/">Zur Startseite</a>
+        <a class="knopf knopf--hell" href="/galerie/">Zur Galerie</a>
+        <a class="knopf knopf--hell" href="/kontakt/">Kontakt</a>
+      </div>
+    </div>
+  </section>
 </Base>

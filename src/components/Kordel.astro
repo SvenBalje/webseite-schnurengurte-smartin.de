@@ -1,0 +1,21 @@
+---
+// Schnurband: kurze Reihe senkrechter Schnüre als Abschnittsbeginn (das einzige Schmuckelement der Seite).
+// Die Anzahl entspricht den Gurtbreiten (13, 15 oder 17 Schnüre), die Farben stammen aus den Wollfarben.
+interface Props {
+  schnuere?: 13 | 15 | 17;
+  /** Farbfolge, wird über die Schnüre wiederholt */
+  farben?: string[];
+}
+
+const { schnuere = 17, farben = ['#ddd3bd', '#ddd3bd', '#17979c', '#ddd3bd', '#b0184f', '#ddd3bd', '#17979c'] } = Astro.props;
+const abstand = 9;
+const breite = schnuere * abstand;
+---
+
+<svg class="kordel" viewBox={`0 0 ${breite} 44`} width={breite} height="44" aria-hidden="true" focusable="false">
+  {
+    Array.from({ length: schnuere }, (_, i) => (
+      <line x1={i * abstand + 3.5} y1="3.5" x2={i * abstand + 3.5} y2="40.5" stroke={farben[i % farben.length]} stroke-width="7" stroke-linecap="round" />
+    ))
+  }
+</svg>

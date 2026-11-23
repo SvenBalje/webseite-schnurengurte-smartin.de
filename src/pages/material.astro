@@ -1,0 +1,60 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import Hero from '../components/Hero.astro';
+import GestalterTeaser from '../components/GestalterTeaser.astro';
+import Farbleiste from '../components/Farbleiste.astro';
+import KontaktBereich from '../components/KontaktBereich.astro';
+import modelle from '../data/modelle';
+import heroBild from '../assets/bilder/kopf/gurte-am-zaun.webp';
+import kordelbaender from '../assets/bilder/kopf/kordelbaender.jpg';
+---
+
+<Base titel="Material & Breiten" beschreibung="Material und Breiten der s.mARTin-Schnurengurte: 13, 15 oder 17 Schnüre aus Mohair, Alpaka, Leinen oder Merino – plus Schnallenschutz aus Wollfilz.">
+  <Hero bild={heroBild} alt="Sechs Schnurengurte in Braun, Natur und Blau hängen an einem Geländer vor einem See" titel="Material & Breiten" klein>
+    <p class="einleitung">Wir haben nur das Beste für Sie: von der passenden Breite bis zur Faser.</p>
+  </Hero>
+
+  <section class="abschnitt" aria-labelledby="breiten">
+    <div class="breite split split--bild-rechts">
+      <div class="split__bild bild-quer">
+        <Image src={kordelbaender} alt="Handgefertigte Kordelbänder: fünf Schnurengurte an einem Holzgeländer am Wasser" widths={[480, 800, 1200]} sizes="(min-width: 52rem) 45vw, 100vw" />
+      </div>
+      <div>
+        <h2 id="breiten">Modelle und Breiten</h2>
+        <ul class="breiten">
+          <li><strong>13</strong> Schnüre für Ponys bis Stockmaß 1&nbsp;m</li>
+          <li><strong>15</strong> Schnüre für Endmaßponys</li>
+          <li><strong>17</strong> Schnüre für Warmblüter</li>
+        </ul>
+        <p class="hinweis">Das sind Empfehlungen, und es muss im Einzelfall auch anders entschieden werden.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="abschnitt abschnitt--wolle" aria-labelledby="materialien">
+    <div class="breite">
+      <div class="abschnitt__kopf">
+        <h2 id="materialien">Materialien</h2>
+      </div>
+      <ul class="material-zeilen">
+        {
+          modelle.map((m) => (
+            <li class="material-zeile">
+              <h3>
+                <a href={`/modelle/${m.slug}/`}>{m.name}</a>
+              </h3>
+              <p>{m.kurz}</p>
+              <Farbleiste farben={m.farben} />
+              <Image src={m.bild.src} alt={m.bild.alt} widths={[144, 288]} sizes="9rem" />
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <GestalterTeaser id="teaser-gestalter" titel="Probieren Sie es aus" text="Breite, Grundfarbe und Motiv wählen – und den Entwurf direkt bei mir anfragen." />
+
+  <KontaktBereich seite="material" />
+</Base>

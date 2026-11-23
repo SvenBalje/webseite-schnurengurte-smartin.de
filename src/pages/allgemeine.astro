@@ -1,0 +1,39 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import schnurengurte from '../assets/bilder/kopf/schnurengurte.jpg';
+---
+
+<Base titel="Rücknahme & Widerruf" beschreibung="Allgemeine Hinweise zur Rücknahme: kein Widerrufsrecht bei Maßanfertigungen nach § 312g BGB, freiwilliges Umtauschrecht bei ausgewählten Sattelgurten.">
+  <section class="abschnitt" aria-labelledby="titel">
+    <div class="breite split split--bild-rechts split--schmal-bild">
+      <div class="split__bild bild-quer">
+        <Image src={schnurengurte} alt="Drei Schnurengurte mit Rautenmustern an einem Geländer am See" widths={[480, 800]} sizes="(min-width: 52rem) 40vw, 100vw" loading="eager" />
+      </div>
+      <div class="rechtstext">
+        <h1 id="titel">Rücknahme &amp; Widerruf</h1>
+        <h2>Kein Widerrufsrecht bei Maßanfertigungen</h2>
+        <ul class="knoten-liste">
+          <li>
+            Gemäß § 312g Abs. 2 Nr. 1 BGB besteht kein Widerrufsrecht bei Verträgen zur Lieferung von Waren, die nicht
+            vorgefertigt sind und für deren Herstellung eine individuelle Auswahl oder Bestimmung durch den Verbraucher
+            maßgeblich ist oder die eindeutig auf die persönlichen Bedürfnisse des Verbrauchers zugeschnitten sind.
+          </li>
+          <li>
+            Bei bestellten Sattelgurten handelt es sich um nicht vorgefertigte Waren, die aufgrund der von Ihnen
+            vorgegebenen Maße hergestellt werden und damit auf Ihre persönlichen Bedürfnisse zugeschnitten sind. Daher
+            besteht bei Maßanfertigungen kein Widerrufsrecht.
+          </li>
+          <li>
+            Der Verbraucher hat bei ausgewählten Sattelgurten ein freiwillig gewährtes Umtauschrecht. Ob ein
+            Umtauschrecht besteht, ergibt sich aus der jeweiligen Artikelbeschreibung.
+          </li>
+          <li>
+            Die nachfolgenden Bestimmungen betreffen daher nur den Widerruf von Verträgen über Waren (Reitzubehör) und
+            Testgurte.
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</Base>

@@ -1,0 +1,29 @@
+/* Wird nur ohne JavaScript geladen (<noscript> in src/layouts/Base.astro).
+   Dann gibt es keinen Menü-Knopf: Untermenüs öffnen per Hover/Fokus, mobil steht die Navigation offen da. */
+
+.menue-knopf {
+  display: none !important;
+}
+
+.hat-untermenue:hover .untermenue,
+.hat-untermenue:focus-within .untermenue {
+  display: block;
+}
+
+@media (max-width: 70rem) {
+  .kopf__innen {
+    flex-wrap: wrap;
+  }
+
+  .haupt-nav {
+    display: block;
+    position: static;
+    box-shadow: none;
+    width: 100%;
+  }
+}
+
+/* Galerie: Filter braucht JavaScript */
+.galerie-filter {
+  display: none;
+}

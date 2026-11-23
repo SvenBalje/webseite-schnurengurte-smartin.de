@@ -1,0 +1,28 @@
+---
+// Originales Firmenlogo (Oval, schwarz mit Goldrand) von der bisherigen Seite.
+// Quelle: src/assets/bilder/logo/logo.png – auf das Oval zugeschnitten, Hintergrund transparent.
+import { Image } from 'astro:assets';
+import logo from '../assets/bilder/logo/logo.png';
+
+interface Props {
+  /** Höhe in Pixeln (Breite ergibt sich aus dem Seitenverhältnis) */
+  hoehe?: number;
+  /** im Fußbereich: lazy laden */
+  imFuss?: boolean;
+}
+
+const { hoehe = 64, imFuss = false } = Astro.props;
+const breite = Math.round((hoehe * logo.width) / logo.height);
+---
+
+<a class="logo" href="/">
+  <Image
+    src={logo}
+    alt="s.mARTin – Schnurengurte und Satteldecken, zur Startseite"
+    width={breite}
+    height={hoehe}
+    densities={[1, 2]}
+    format="webp"
+    loading={imFuss ? 'lazy' : 'eager'}
+  />
+</a>

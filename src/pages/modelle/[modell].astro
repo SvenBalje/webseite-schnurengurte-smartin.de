@@ -1,0 +1,132 @@
+---
+import { Image, Picture } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import Kordel from '../../components/Kordel.astro';
+import Farbleiste from '../../components/Farbleiste.astro';
+import { hexFuer } from '../../data/farben';
+import KontaktBereich from '../../components/KontaktBereich.astro';
+import modelle, { type Modell } from '../../data/modelle';
+
+export function getStaticPaths() {
+  return modelle.map((modell) => ({ params: { modell: modell.slug }, props: { modell } }));
+}
+
+interface Props {
+  modell: Modell;
+}
+
+const { modell: m } = Astro.props;
+const andere = modelle.filter((x) => x.slug !== m.slug);
+---
+
+<Base titel={m.slug === 'schnallenschutz' ? 'Schnallenschutz' : `Schnurengurte aus ${m.name}`} beschreibung={m.beschreibung}>
+  <section class="abschnitt" aria-labelledby="modell-titel">
+    <div class="breite split split--bild-rechts">
+      <div class="split__bild bild-hochkant">
+        <Picture src={m.bild.src} alt={m.bild.alt} widths={[360, 560, 800]} sizes="(min-width: 74rem) 34rem, (min-width: 52rem) 45vw, 100vw" formats={["avif", "webp"]} fallbackFormat="jpg" quality={55} loading="eager" fetchpriority="high" />
+      </div>
+      <div>
+        <Farbleiste farben={m.farben} />
+        <h1 id="modell-titel">{m.name}</h1>
+        {m.absaetze.map((a, i) => <p class:list={{ einleitung: i === 0 }}>{a}</p>)}
+        {m.eigenschaftenTitel && <p><strong>{m.eigenschaftenTitel}</strong></p>}
+        {
+          m.eigenschaften && (
+            <ul class="knoten-liste">
+              {m.eigenschaften.map((e) => (
+                <li>{e}</li>
+              ))}
+            </ul>
+          )
+        }
+        {m.nachsatz?.map((a) => <p>{a}</p>)}
+        <div class="knopf-reihe">
+          {m.slug !== 'schnallenschutz' && <a class="knopf knopf--akzent" href="/gurt-gestalten/">Diesen Gurt gestalten</a>}
+          <a class="knopf" href="#kontakt">{m.slug === 'schnallenschutz' ? 'Schnallenschutz anfragen' : 'Gurt anfragen'}</a>
+          <a class="knopf knopf--hell" href="/preise/">Preise ansehen</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {
+    m.varianten.length > 0 && (
+      <section class="abschnitt abschnitt--wolle" aria-labelledby="varianten">
+        <div class="breite">
+          <div class="abschnitt__kopf">
+            <h2 id="varianten">{m.name} im Detail</h2>
+          </div>
+          <div class="karten">
+            {m.varianten.map((v) => (
+              <article class="karte">
+                <Image src={v.bild.src} alt={v.bild.alt} widths={[400, 640, 900]} sizes="(min-width: 64rem) 30vw, (min-width: 40rem) 45vw, 100vw" />
+                <div class="karte__text">
+                  <h3>{v.titel}</h3>
+                  {v.text?.map((t) => <p>{t}</p>)}
+                  {v.farben && (
+                    <>
+                      <p class="visuell-versteckt">Verfügbare Farben:</p>
+                      <ul class="chips">
+                        {v.farben.map((f) => (
+                          <li>
+                            <svg viewBox="0 0 16 16" aria-hidden="true">
+                              {hexFuer(f).map((hex, i, alle) => (
+                                <rect x={(16 / alle.length) * i} y="0" width={16 / alle.length} height="16" fill={hex} />
+                              ))}
+                            </svg>
+                            {f}
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    m.vertiefung && (
+      <section class="abschnitt" aria-labelledby="vertiefung">
+        <div class="breite text-breite">
+          <h2 id="vertiefung">{m.vertiefung.titel}</h2>
+          {m.vertiefung.absaetze.map((a, i) => (
+            <>
+              {m.vertiefung?.zwischentitel?.[i] && <h3>{m.vertiefung.zwischentitel[i]}</h3>}
+              <p>{a}</p>
+            </>
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  <section class="abschnitt abschnitt--sand" aria-labelledby="weitere">
+    <div class="breite">
+      <div class="abschnitt__kopf">
+        <Kordel />
+        <h2 id="weitere">Weitere Materialien</h2>
+      </div>
+      <ul class="material-zeilen">
+        {
+          andere.map((x) => (
+            <li class="material-zeile">
+              <h3>
+                <a href={`/modelle/${x.slug}/`}>{x.name}</a>
+              </h3>
+              <p>{x.kurz}</p>
+              <Farbleiste farben={x.farben} />
+              <Image src={x.bild.src} alt={x.bild.alt} widths={[144, 288]} sizes="9rem" />
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <KontaktBereich seite={m.slug} vorlage={`Hallo Simone, ich interessiere mich für ${m.slug === 'schnallenschutz' ? 'einen Schnallenschutz' : `einen Gurt aus ${m.name}`}.\n\n`} titel="Dann schreiben Sie mir doch!" />
+</Base>

@@ -1,0 +1,51 @@
+---
+import Base from '../layouts/Base.astro';
+import GurtGestalter from '../components/GurtGestalter.astro';
+import KontaktBereich from '../components/KontaktBereich.astro';
+import Handlung from '../components/Handlung.astro';
+---
+
+<Base
+  titel="Gurt gestalten"
+  beschreibung="Gestalten Sie Ihren Schnurengurt online: 13, 15 oder 17 Schnüre, Grundfarbe, Motiv und Motivfarbe wählen – und den Entwurf direkt bei Simone Behrens anfragen."
+>
+  <section class="abschnitt abschnitt--start" aria-labelledby="gestalter-titel">
+    <div class="breite">
+      <GurtGestalter titelEbene="h1" titel="Gestalten Sie Ihren Schnurengurt">
+        <p class="einleitung">
+          Die Gurte werden eigens für Sie gefertigt, und Sie können aktiv an der Gestaltung Ihres Schnurengurtes
+          mitwirken. Probieren Sie Breite, Farben und Motiv aus – und schicken Sie mir Ihren Entwurf.
+        </p>
+      </GurtGestalter>
+    </div>
+  </section>
+
+  <section class="abschnitt abschnitt--wolle" aria-labelledby="ablauf">
+    <div class="breite">
+      <div class="abschnitt__kopf">
+        <h2 id="ablauf">So geht es weiter</h2>
+      </div>
+      <ol class="ablauf">
+        <li>
+          <h3>Entwurf anfragen</h3>
+          <p>Mit „Diesen Entwurf anfragen“ landet Ihre Auswahl im Kontaktformular. Ergänzen Sie gern Pferd, Sattel und Gurtlänge.</p>
+        </li>
+        <li>
+          <h3>Gemeinsam abstimmen</h3>
+          <p>Ich melde mich bei Ihnen. Wir besprechen Material, Farben, Muster und Maße – gerade oder anatomisch geformt.</p>
+        </li>
+        <li>
+          <h3>Handgefertigt für Sie</h3>
+          <p>Ihr Gurt wird von Hand geknüpft und mit Edelstahl-Rollschnallen versehen. Jeder Gurt ist ein Unikat.</p>
+        </li>
+      </ol>
+      <p class="abstand-oben-klein">
+        Alles über Fasern und Breiten finden Sie unter <a href="/material/">Material &amp; Breiten</a>, Kosten und
+        Probegurt unter <a href="/preise/">Preise</a>.
+      </p>
+      <Handlung text="Lieber persönlich besprechen?" gestalten={false} anfragen="Nachricht schreiben" anrufen />
+    </div>
+  </section>
+
+  <KontaktBereich seite="gestalter" titel="Ihren Entwurf anfragen" text="Ihr Entwurf steht nach dem Klick auf „Diesen Entwurf anfragen“ schon in der Nachricht. Ergänzen Sie, was Ihnen wichtig ist – ich melde mich." />
+</Base>

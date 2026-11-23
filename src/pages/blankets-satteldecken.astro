@@ -1,0 +1,68 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import KontaktBereich from '../components/KontaktBereich.astro';
+import schabracke from '../assets/bilder/blankets/schabracke-sattelfilz.webp';
+import vb from '../assets/bilder/blankets/sattelfilz-vb.webp';
+import wb from '../assets/bilder/blankets/sattelfilz-wb.webp';
+
+const produkte = [
+  {
+    titel: 'Schabracke aus Sattelfilz',
+    details: ['5 mm', 'Größe WB'],
+    preis: '215 €',
+    bild: schabracke,
+    alt: 'Dunkelblaue Schabracke aus Sattelfilz mit rotem Ornament und grauer Kordelkante',
+  },
+  {
+    titel: 'Sattelfilz',
+    details: ['5 mm stark', 'Größe VB'],
+    preis: '189 €',
+    bild: vb,
+    alt: 'Grüne Satteldecke aus Sattelfilz mit rotem Ornament und grauer Kordelkante',
+  },
+  {
+    titel: 'Sattelfilz',
+    details: ['5 mm stark', 'Größe WB'],
+    preis: '210 €',
+    bild: wb,
+    alt: 'Grüne Satteldecke aus Sattelfilz mit gelb-grünem Ornament und grauer Kordelkante',
+  },
+];
+---
+
+<Base titel="Blankets & Satteldecken" beschreibung="Handgefertigte Blankets und Satteldecken aus 5 mm Sattelfilz mit Ornament und Kordelkante – Schabracke und Sattelfilz in VB und WB, ab 189 €.">
+  <section class="seitenkopf">
+    <div class="breite">
+      <h1>Blankets &amp; Satteldecken</h1>
+      <p class="einleitung">Handgefertigt aus 5&nbsp;mm starkem Sattelfilz, verziert mit Ornament und Kordelkante.</p>
+      <div class="knopf-reihe">
+        <a class="knopf knopf--akzent" href="#kontakt">Jetzt anfragen</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="abschnitt abschnitt--wolle" aria-label="Angebot">
+    <div class="breite karten">
+      {
+        produkte.map((p) => (
+          <article class="karte">
+            <Image src={p.bild} alt={p.alt} widths={[400, 640, 900]} sizes="(min-width: 64rem) 30vw, (min-width: 40rem) 45vw, 100vw" />
+            <div class="karte__text">
+              <h2 class="h3-gross">{p.titel}</h2>
+              <ul class="chips">
+                {p.details.map((d) => (
+                  <li>{d}</li>
+                ))}
+              </ul>
+              <p class="preis abstand-oben-klein">{p.preis}</p>
+              <a class="knopf knopf--hell abstand-oben-klein" href="#kontakt">Anfragen</a>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <KontaktBereich seite="blankets" vorlage={'Hallo Simone, ich interessiere mich für eine Satteldecke.\n\n'} titel="Interesse an einer Satteldecke?" />
+</Base>

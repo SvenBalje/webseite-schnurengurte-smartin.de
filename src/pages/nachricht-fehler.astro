@@ -1,0 +1,22 @@
+---
+import Base from '../layouts/Base.astro';
+import site from '../site.config';
+
+const i = site.impressum;
+---
+
+<Base titel="Nachricht nicht verschickt" beschreibung="Ihre Nachricht an s.mARTin Schnurengurte konnte leider nicht verschickt werden. Bitte versuchen Sie es erneut oder rufen Sie an." noindex>
+  <section class="abschnitt">
+    <div class="breite abschnitt__kopf abschnitt__kopf--mitte">
+      <h1>Nachricht nicht verschickt</h1>
+      <p class="einleitung">
+        Bitte prüfen Sie, ob Name, E-Mail-Adresse und Nachricht ausgefüllt sind, und versuchen Sie es noch einmal.
+        Sie erreichen mich auch direkt per Telefon unter <a href={`tel:${i.telefonLink}`}>{i.telefon}</a> oder per
+        E-Mail an <a href={`mailto:${i.email}`}>{i.email}</a>.
+      </p>
+      <div class="knopf-reihe">
+        <a class="knopf" href="/kontakt/">Zurück zum Formular</a>
+      </div>
+    </div>
+  </section>
+</Base>

@@ -17,7 +17,8 @@ export default defineConfig({
   vite: { build: { assetsInlineLimit: 0 } },
   integrations: [
     sitemap({
-      filter: (page) => !page.includes('/404'),
+      // Fehler- und Danke-Seiten gehören nicht in die Sitemap
+      filter: (page) => !/\/(404|danke|nachricht-fehler)\/?$/.test(page),
     }),
   ],
 });

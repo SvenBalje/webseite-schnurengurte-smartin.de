@@ -1,0 +1,37 @@
+---
+// Einheitliche Handlungsaufforderung am Ende eines Abschnitts: Gestalten, Anfragen, Anrufen.
+// Ein leerer String bzw. false blendet den jeweiligen Knopf aus.
+import site from '../site.config';
+
+interface Props {
+  text?: string;
+  /** Beschriftung des Gestalter-Knopfs */
+  gestalten?: string | false;
+  /** Beschriftung des Anfrage-Knopfs */
+  anfragen?: string | false;
+  /** Ziel der Anfrage: Formular auf derselben Seite oder Kontaktseite */
+  anfragenZiel?: string;
+  anrufen?: boolean;
+  /** auf dunklem Hintergrund (Petrol) */
+  dunkel?: boolean;
+}
+
+const {
+  text,
+  gestalten = 'Gurt gestalten',
+  anfragen = 'Anfragen',
+  anfragenZiel = '#kontakt',
+  anrufen = false,
+  dunkel = false,
+} = Astro.props;
+const i = site.impressum;
+---
+
+<div class="handlung">
+  {text && <p class="handlung__text">{text}</p>}
+  <div class="knopf-reihe">
+    {gestalten && <a class:list={['knopf', dunkel ? 'knopf--auf-dunkel' : 'knopf--akzent']} href="/gurt-gestalten/">{gestalten}</a>}
+    {anfragen && <a class:list={['knopf', dunkel ? 'knopf--rahmen' : 'knopf--hell']} href={anfragenZiel}>{anfragen}</a>}
+    {anrufen && <a class:list={['knopf', dunkel ? 'knopf--rahmen' : 'knopf--hell']} href={`tel:${i.telefonLink}`}>Anrufen: {i.telefon}</a>}
+  </div>
+</div>

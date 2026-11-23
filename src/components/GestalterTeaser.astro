@@ -1,0 +1,49 @@
+---
+// Hinweis auf den Gurt-Gestalter: drei Beispielgurte als Skizze (ohne JavaScript) und der Weg dorthin.
+import { gurtSvg } from '../scripts/gurt-svg';
+import { startAuswahl, kurzText, zuGurtOptionen, type Auswahl } from '../data/konfigurator';
+import Handlung from './Handlung.astro';
+
+interface Props {
+  id: string;
+  titel?: string;
+  text?: string;
+}
+
+const {
+  id,
+  titel = 'Ihr Gurt, Ihr Entwurf',
+  text = 'Stellen Sie Ihren Schnurengurt online zusammen und schicken Sie mir den Entwurf – ich melde mich mit einem Vorschlag.',
+} = Astro.props;
+
+// Drei Beispiele, die zeigen, was der Gestalter kann
+const beispiele = (
+  [
+    { schnuere: 13, material: 'merino', grund: 'Schwarz', motiv: 'dreieck', motivFarbe: 'Weiß', filz: 'Beere', laenge: 100 },
+    { schnuere: 17, form: 'anatomisch', grund: 'Natur', motiv: 'raute', motivFarbe: 'Türkis', filz: 'Türkis' },
+    { schnuere: 15, art: 'western', material: 'leinen', grund: 'Braun', motiv: 'streifen', motivFarbe: 'Natur', schnalle: 'messing', filz: 'Dunkelbraun', laenge: 100 },
+  ] as Array<Partial<Auswahl>>
+).map((teil) => {
+  const a: Auswahl = { ...startAuswahl, ...teil };
+  return gurtSvg(zuGurtOptionen(a), `Beispielgurt: ${kurzText(a)}`);
+});
+---
+
+<section class="abschnitt teaser-gestalter" aria-labelledby={id}>
+  <div class="breite teaser-gestalter__raster">
+    <div class="teaser-gestalter__gurte">
+      {beispiele.map((svg) => <Fragment set:html={svg} />)}
+    </div>
+    <div>
+      <h2 id={id}>{titel}</h2>
+      <p class="einleitung">{text}</p>
+      <ol class="knoten-liste">
+        <li><strong>Modell</strong>: Englisch- oder Westerngurt, gerade oder anatomisch geformt</li>
+        <li><strong>Material und Maße</strong>: Mohair, Alpaka, Leinen oder Merino, 13 bis 17 Schnüre</li>
+        <li><strong>Farben und Muster</strong>: von schlicht bis Doppelraute</li>
+        <li><strong>Ausstattung</strong>: Schnalle, Schnallenschutz und D-Ring – mit Richtpreis</li>
+      </ol>
+      <Handlung gestalten="Zum Gurt-Gestalter" anfragen={false} anrufen />
+    </div>
+  </div>
+</section>

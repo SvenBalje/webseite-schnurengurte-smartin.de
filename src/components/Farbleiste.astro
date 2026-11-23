@@ -1,0 +1,21 @@
+---
+// Farbleiste: die echten Wollfarben eines Materials als senkrechte Schnüre.
+import { hexFuer } from '../data/farben';
+
+interface Props {
+  farben: string[];
+}
+
+const hexWerte = Astro.props.farben.flatMap(hexFuer);
+const abstand = 11;
+---
+
+{
+  hexWerte.length > 0 && (
+    <svg class="farbleiste" viewBox={`0 0 ${hexWerte.length * abstand} 52`} width={hexWerte.length * abstand} height="52" aria-hidden="true" focusable="false">
+      {hexWerte.map((hex, i) => (
+        <line x1={i * abstand + 4.5} y1="4.5" x2={i * abstand + 4.5} y2="47.5" stroke={hex} stroke-width="9" stroke-linecap="round" />
+      ))}
+    </svg>
+  )
+}

@@ -1,0 +1,46 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import KontaktBereich from '../components/KontaktBereich.astro';
+import schnurengurte from '../assets/bilder/kopf/schnurengurte.jpg';
+---
+
+<Base titel="Pflege von Mohair- und Alpaka-Gurten" beschreibung="So pflegen Sie Ihren Sattelgurt aus Mohair oder Alpaka richtig: Handwäsche mit Wollwaschmittel, nicht rubbeln, liegend trocknen. Mit Pflegeanleitung als PDF.">
+  <section class="abschnitt" aria-labelledby="pflege-titel">
+    <div class="breite split split--schmal-bild">
+      <div class="split__bild bild-hochkant">
+        <Image src={schnurengurte} alt="Drei Schnurengurte mit Rautenmustern in Rot, Natur und Türkis an einem Geländer am See" widths={[480, 800, 1200]} sizes="(min-width: 52rem) 40vw, 100vw" loading="eager" />
+      </div>
+      <div>
+        <h1 id="pflege-titel">Die richtige Pflege für Ihren Mohair- oder Alpaka-Sattelgurt</h1>
+        <p class="einleitung">
+          Produkte aus Mohair und Alpaka sind beliebt, kein Wunder: Die Wolle aus der wertvollsten Ziegenrasse gehört
+          zu den hochwertigsten Fasern, die die Natur zu bieten hat. Das gilt auch für Alpaka, daher ist eine sorgsame
+          Pflege unabdingbar.
+        </p>
+        <p>
+          Damit Ihr Sattelgurt aus Mohair oder Alpaka schön bleibt, sollten Sie beim Waschen Sorgfalt walten lassen.
+          Das heißt, Sie sollten den Gurt mit der Hand waschen.
+        </p>
+        <h2>So geht’s</h2>
+        <ol class="knoten-liste">
+          <li>Legen Sie den Gurt in eine Schüssel mit lauwarmem Wasser und feinem Wollwaschmittel oder Haarwäsche.</li>
+          <li>In der Lauge lassen Sie den Gurt 10 Minuten weichen und bewegen ihn vorsichtig durchs Wasser – nicht rubbeln!</li>
+          <li>Danach gründlich mit lauwarmem Wasser spülen.</li>
+          <li>
+            Zum Trocknen nicht direkt in den Wäscheständer legen oder hängen. Breiten Sie ein Handtuch aus und legen Sie
+            den Gurt darauf. Dort sollten Sie das gute Stück nass abtropfen lassen, ohne es vorher auszuwringen, da Sie so
+            die Faser beschädigen könnten.
+          </li>
+        </ol>
+        <p>Dann wünsche ich viel Freude mit dem neuen Sattelgurt.</p>
+        <p class="unterschrift">Ihre s.&nbsp;mARTin</p>
+        <div class="knopf-reihe">
+          <a class="knopf knopf--akzent" href="/downloads/pflegeanleitung-schnurengurt.pdf" download>Pflegeanleitung als PDF (41&nbsp;KB)</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <KontaktBereich seite="pflege" titel="Fragen zur Pflege? Schreiben Sie mir!" />
+</Base>

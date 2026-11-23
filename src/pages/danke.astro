@@ -1,0 +1,18 @@
+---
+import Base from '../layouts/Base.astro';
+import Kordel from '../components/Kordel.astro';
+---
+
+<Base titel="Vielen Dank für Ihre Nachricht" beschreibung="Ihre Nachricht an s.mARTin Schnurengurte wurde verschickt. Simone Behrens meldet sich so bald wie möglich bei Ihnen." noindex>
+  <section class="abschnitt">
+    <div class="breite abschnitt__kopf abschnitt__kopf--mitte">
+      <h1>Vielen Dank!</h1>
+      <p class="einleitung">Ihre Nachricht ist angekommen. Ich melde mich so bald wie möglich bei Ihnen.</p>
+      <Kordel />
+      <div class="knopf-reihe">
+        <a class="knopf" href="/">Zur Startseite</a>
+        <a class="knopf knopf--hell" href="/galerie/">Zur Galerie</a>
+      </div>
+    </div>
+  </section>
+</Base>

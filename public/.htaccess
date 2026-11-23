@@ -11,6 +11,10 @@ DirectoryIndex index.html
   RewriteCond %{HTTPS} !=on
   RewriteCond %{HTTP:X-Forwarded-Proto} !=https
   RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  # Alte Adressen der Webflow-Seite
+  RewriteRule ^impressum\.html$ /impressum/ [L,R=301]
+  RewriteRule ^datenschutz\.html$ /datenschutz/ [L,R=301]
 </IfModule>
 
 # Versteckte Dateien (z. B. .git, .ftp-deploy-sync-state.json) nie ausliefern

@@ -1,0 +1,115 @@
+---
+import Base from '../layouts/Base.astro';
+import KontaktBereich from '../components/KontaktBereich.astro';
+import { laengen, preisgruppen, extraNamen, euro, type Extra } from '../data/preise';
+
+const groessen = laengen.map((l) => `Bis ${l} cm`);
+// Reihenfolge der Aufpreise wie auf der bisherigen Seite
+const reihenfolge: Extra[] = ['dRing', 'dreiecke', 'western', 'messing', 'anatomisch'];
+const listen = Object.values(preisgruppen).map((g) => ({
+  titel: g.titel,
+  preise: g.grundpreise.map(euro),
+  extras: reihenfolge.map((e) => [extraNamen[e].name, `+${euro(g.extras[e])}`, extraNamen[e].info] as const),
+}));
+---
+
+<Base titel="Preise" beschreibung="Preise für handgefertigte Schnurengurte aus Leinen, Merino, Mohair und Alpaka – nach Länge, mit Aufpreisen, Versandkosten und Probegurt zum Leihen.">
+  <section class="seitenkopf">
+    <div class="breite">
+      <h1>Preise</h1>
+      <p class="einleitung">Der Preis richtet sich nach Material und Länge des Gurtes. Extras werden einfach aufgeschlagen.</p>
+      <div class="knopf-reihe">
+        <a class="knopf knopf--akzent" href="/gurt-gestalten/">Gurt gestalten</a>
+        <a class="knopf knopf--hell" href="#kontakt">Angebot anfragen</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="abschnitt abschnitt--wolle" aria-label="Preislisten">
+    <div class="breite preis-karten">
+      {
+        listen.map((liste, n) => (
+          <article class="preis-karte">
+            <h2>{liste.titel}</h2>
+            <table class="tabelle">
+              <caption>Grundpreis nach Länge</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Größe</th>
+                  <th scope="col">Preis</th>
+                </tr>
+              </thead>
+              <tbody>
+                {groessen.map((g, i) => (
+                  <tr>
+                    <th scope="row">{g}</th>
+                    <td>{liste.preise[i]}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <table class="tabelle">
+              <caption>Aufpreise</caption>
+              <thead class="visuell-versteckt">
+                <tr>
+                  <th scope="col">Extra</th>
+                  <th scope="col">Aufpreis</th>
+                </tr>
+              </thead>
+              <tbody>
+                {liste.extras.map(([name, preis, info]) => (
+                  <tr>
+                    <th scope="row">
+                      {name}
+                      {info && <small>{info}</small>}
+                    </th>
+                    <td>{preis}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="abschnitt" aria-labelledby="versand">
+    <div class="breite preis-karten">
+      <article class="preis-karte">
+        <h2 id="versand">Versandkosten</h2>
+        <table class="tabelle">
+          <thead>
+            <tr>
+              <th scope="col">Bestellwert</th>
+              <th scope="col">Preis</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">Bis 200 €</th><td>6 €</td></tr>
+            <tr><th scope="row">Ab 200 €</th><td>versandkostenfrei</td></tr>
+            <tr><th scope="row">Ausland</th><td>15 €</td></tr>
+          </tbody>
+        </table>
+      </article>
+      <article class="hervorhebung">
+        <h2>Probegurt</h2>
+        <p>Sie können einen Probegurt bestellen, der einen Monat zur Probe bleiben kann.</p>
+        <table class="tabelle">
+          <caption>Leihgebühren</caption>
+          <tbody>
+            <tr><th scope="row">14 Tage</th><td>15 €</td></tr>
+            <tr><th scope="row">Vier Wochen</th><td>25 €</td></tr>
+          </tbody>
+        </table>
+        <p class="hinweis">Zuzüglich Versand.</p>
+        <div class="knopf-reihe">
+          <a class="knopf knopf--akzent" href="#kontakt">Probegurt anfragen</a>
+        </div>
+        <p><a class="pfeil-link" href="/allgemeine/">Hinweise zu Rücknahme &amp; Widerruf</a></p>
+      </article>
+    </div>
+  </section>
+
+  <KontaktBereich seite="preise" titel="Fragen zum Preis? Schreiben Sie mir!" />
+</Base>
